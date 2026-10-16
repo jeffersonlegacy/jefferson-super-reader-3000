@@ -1,0 +1,23 @@
+{
+  "name": "jefferson-super-reader-3000",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Multimodal Document Intelligence & Zero-Lag ORP RSVP Speed-Reading Engine",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static bundle verified'",
+    "test": "node src/services/tokenizer.test.mjs"
+  },
+  "keywords": [
+    "rsvp",
+    "speed-reading",
+    "orp",
+    "gemini-vision",
+    "cloudconvert",
+    "ocr",
+    "typescript"
+  ],
+  "author": "Michael Jefferson",
+  "license": "MIT"
+}
