@@ -3,709 +3,844 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jefferson Super Reader 3000 — Multimodal Vision OCR &amp; ORP RSVP Engine</title>
+    <title>Jefferson Super Reader 3000 — Optical ORP &amp; Multimodal Document Instrument</title>
     <meta
       name="description"
-      content="Interactive Optimal Recognition Point (ORP) RSVP Speed-Reading Engine powered by CloudConvert document normalization and Gemini Vision layout-aware OCR."
+      content="Multimodal Document Intelligence & Optimal Recognition Point (ORP) RSVP Speed-Reading Instrument. Built with CloudConvert, Gemini Vision OCR normalization, and deterministic cadence scheduling."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
     />
     <style>
       :root {
-        --bg: #070b14;
-        --panel: #0f172a;
-        --panel-border: #1e293b;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-        --accent: #38bdf8;
-        --orp: #f43f5e;
-        --emerald: #10b981;
-        --amber: #f59e0b;
+        --bg: #09090b;
+        --surface: #101013;
+        --surface-2: #16161a;
+        --line: #242429;
+        --line-strong: #383840;
+        --paper: #f4f1ea;
+        --muted: #9a9a9e;
+        --dim: #686870;
+        --reticle: #e60000;
+        --amber: #e5a000;
+        --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        --display: "Space Grotesk", sans-serif;
       }
-      * {
+
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
+
       body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-        background: radial-gradient(circle at top, #0f172a 0%, #050811 100%);
-        color: var(--text);
-        min-height: 100vh;
+        background: var(--bg);
+        color: var(--paper);
+        font-family: var(--sans);
+        min-height: 100dvh;
         line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
-      .container {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 1.5rem;
+
+      .mono {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
       }
-      header {
+
+      .shell {
+        width: min(1320px, 100% - 2rem);
+        margin-inline: auto;
+        border-inline: 1px solid var(--line);
+        min-height: 100dvh;
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
+      }
+
+      /* Top Telemetry Strip */
+      .top-bar {
+        display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 1rem;
-        padding-bottom: 1.25rem;
-        border-bottom: 1px solid var(--panel-border);
-        margin-bottom: 1.5rem;
-      }
-      .brand-group {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .badge {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        padding: 0.65rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        background: #050507;
         font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.25rem 0.6rem;
-        border-radius: 999px;
-        background: rgba(56, 189, 248, 0.12);
-        color: var(--accent);
-        border: 1px solid rgba(56, 189, 248, 0.3);
-      }
-      .nav-links {
-        display: flex;
+        color: var(--muted);
+        flex-wrap: wrap;
         gap: 0.75rem;
+      }
+
+      .top-bar a {
+        color: var(--paper);
+        text-decoration: none;
+        border: 1px solid var(--line-strong);
+        padding: 0.25rem 0.6rem;
+        background: var(--surface);
+      }
+
+      .top-bar a:hover {
+        border-color: var(--reticle);
+      }
+
+      /* Header */
+      header {
+        padding: 1.5rem 1.5rem;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .kicker {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        color: var(--reticle);
+        margin-bottom: 0.3rem;
+      }
+
+      h1 {
+        font-family: var(--display);
+        font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.2rem);
+        letter-spacing: -0.02em;
+      }
+
+      .hotkeys {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 0.7rem;
+        color: var(--muted);
         flex-wrap: wrap;
       }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.5rem 0.95rem;
-        border-radius: 0.5rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: 1px solid var(--panel-border);
-        background: #1e293b;
-        color: var(--text);
-        transition: all 0.15s ease;
+
+      kbd {
+        font-family: var(--mono);
+        background: var(--surface-2);
+        border: 1px solid var(--line-strong);
+        padding: 0.12rem 0.4rem;
+        color: var(--paper);
       }
-      .btn:hover {
-        border-color: var(--accent);
-      }
-      .btn-primary {
-        background: var(--accent);
-        color: #020617;
-        border-color: var(--accent);
-      }
-      .btn-danger {
-        background: rgba(244, 63, 94, 0.15);
-        color: #fda4af;
-        border-color: rgba(244, 63, 94, 0.35);
-      }
-      .grid {
+
+      /* Main Workbench Grid */
+      .instrument-grid {
         display: grid;
-        grid-template-columns: 1.35fr 1fr;
-        gap: 1.5rem;
+        grid-template-columns: 1.45fr 1fr;
+        flex: 1;
       }
-      @media (max-width: 920px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
+
+      .left-col {
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
       }
-      .card {
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid var(--panel-border);
-        border-radius: 0.85rem;
-        padding: 1.35rem;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-      }
-      .card-header {
+
+      .panel-bar {
+        padding: 0.7rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        background: #0c0c0f;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        color: var(--muted);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
       }
-      .card-title {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-      }
-      /* ORP RETICLE STAGE */
-      .orp-stage {
+
+      /* Optical RSVP Viewport */
+      .optical-chamber {
+        background: #040406;
+        border-bottom: 1px solid var(--line);
+        height: 230px;
         position: relative;
-        background: #020617;
-        border: 1px solid #1e293b;
-        border-radius: 0.75rem;
-        height: 220px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        margin-bottom: 1.25rem;
       }
-      .orp-guide-top,
-      .orp-guide-bottom {
+
+      .guide-line-h {
         position: absolute;
-        left: 38%;
-        width: 2px;
-        height: 28px;
-        background: var(--orp);
-        opacity: 0.75;
-      }
-      .orp-guide-top {
-        top: 14px;
-      }
-      .orp-guide-bottom {
-        bottom: 14px;
-      }
-      .orp-crosshair-line {
-        position: absolute;
+        inset-inline: 0;
         top: 50%;
-        left: 0;
-        right: 0;
         height: 1px;
-        background: rgba(148, 163, 184, 0.1);
+        background: rgba(255, 255, 255, 0.04);
         pointer-events: none;
       }
-      .orp-word-row {
-        position: relative;
-        width: 100%;
-        display: grid;
-        grid-template-columns: 38% auto 1fr;
-        align-items: baseline;
-        font-family: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
-        font-size: clamp(2rem, 4.2vw, 3.35rem);
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        user-select: none;
-      }
-      .orp-prefix {
-        text-align: right;
-        color: #e2e8f0;
-      }
-      .orp-anchor {
-        color: var(--orp);
-        text-shadow: 0 0 18px rgba(244, 63, 94, 0.55);
-        transform: translateX(-50%);
-        display: inline-block;
-      }
-      .orp-suffix {
-        text-align: left;
-        color: #e2e8f0;
-        margin-left: -0.3em;
-      }
-      .stage-hud {
+
+      .reticle-tick-top,
+      .reticle-tick-bottom {
         position: absolute;
-        bottom: 10px;
-        left: 14px;
-        right: 14px;
-        display: flex;
-        justify-content: space-between;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 0.74rem;
-        color: var(--muted);
+        left: 40%;
+        width: 2px;
+        height: 26px;
+        background: var(--reticle);
       }
-      .controls-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        align-items: center;
-        margin-bottom: 1.1rem;
+
+      .reticle-tick-top {
+        top: 0;
       }
-      .slider-grid {
+
+      .reticle-tick-bottom {
+        bottom: 0;
+      }
+
+      .reticle-crosshair {
+        position: absolute;
+        left: 40%;
+        top: 26px;
+        bottom: 26px;
+        width: 1px;
+        border-left: 1px dashed rgba(230, 0, 0, 0.28);
+        pointer-events: none;
+      }
+
+      .word-plane {
+        width: 100%;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        grid-template-columns: 40% auto 1fr;
+        align-items: baseline;
+        font-family: var(--mono);
+        font-size: clamp(2.1rem, 1.5rem + 2.2vw, 3.25rem);
+        font-weight: 600;
+        z-index: 2;
       }
-      .slider-box {
-        background: rgba(2, 6, 23, 0.6);
-        border: 1px solid var(--panel-border);
-        padding: 0.75rem 0.9rem;
-        border-radius: 0.6rem;
+
+      .w-pre {
+        text-align: right;
+        color: var(--paper);
       }
-      .slider-box label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: var(--muted);
-        margin-bottom: 0.35rem;
+
+      .w-orp {
+        color: var(--reticle);
+        font-weight: 700;
+        border-bottom: 3px solid var(--reticle);
+        padding-bottom: 2px;
       }
-      .slider-box input[type='range'] {
-        width: 100%;
-        accent-color: var(--accent);
+
+      .w-post {
+        text-align: left;
+        color: var(--paper);
       }
+
       .progress-track {
-        width: 100%;
-        height: 8px;
-        background: #020617;
-        border-radius: 999px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-        border: 1px solid #1e293b;
-        cursor: pointer;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--surface-2);
       }
+
       .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--orp));
         width: 0%;
-        transition: width 0.08s linear;
+        background: var(--reticle);
+        transition: width 60ms linear;
       }
-      .token-stream-box {
-        background: #020617;
-        border: 1px solid var(--panel-border);
-        border-radius: 0.6rem;
-        padding: 0.85rem;
-        max-height: 175px;
-        overflow-y: auto;
-        font-size: 0.86rem;
-        line-height: 1.65;
-        color: var(--muted);
+
+      /* Telemetry Strip */
+      .telemetry-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
       }
-      .token-chip {
-        display: inline-block;
-        padding: 0.08rem 0.3rem;
-        border-radius: 0.25rem;
-        margin-right: 0.2rem;
-        cursor: pointer;
+
+      .t-cell {
+        padding: 0.7rem 0.9rem;
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
       }
-      .token-chip.active {
-        background: rgba(244, 63, 94, 0.22);
-        color: #fff;
-        border: 1px solid rgba(244, 63, 94, 0.5);
+
+      .t-cell:last-child {
+        border-right: none;
+      }
+
+      .t-label {
+        font-size: 0.65rem;
+        color: var(--dim);
+        letter-spacing: 0.06em;
+      }
+
+      .t-val {
+        font-size: 0.95rem;
         font-weight: 600;
+        color: var(--paper);
       }
-      textarea {
-        width: 100%;
-        min-height: 120px;
-        background: #020617;
-        border: 1px solid var(--panel-border);
-        border-radius: 0.6rem;
-        color: var(--text);
-        padding: 0.75rem;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 0.8rem;
-        resize: vertical;
-        margin-bottom: 0.75rem;
-      }
-      .preset-pills {
+
+      /* Transport & Cadence Controls */
+      .controls-deck {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--line);
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--bg);
+      }
+
+      button,
+      .file-label {
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 0.58rem 0.95rem;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--paper);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      button:hover,
+      .file-label:hover {
+        background: var(--surface-2);
+        border-color: var(--muted);
+      }
+
+      .btn-primary {
+        background: var(--reticle);
+        border-color: var(--reticle);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: #ff2222;
+        border-color: #ff2222;
+      }
+
+      .wpm-control {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-size: 0.74rem;
+      }
+
+      input[type="range"] {
+        accent-color: var(--reticle);
+        width: 150px;
+        cursor: pointer;
+      }
+
+      /* Token Context Ribbon */
+      .ribbon-box {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        flex: 1;
+      }
+
+      .token-ribbon {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        max-height: 210px;
+        overflow-y: auto;
+        padding: 0.85rem;
+        background: #050507;
+        border: 1px solid var(--line);
+        font-size: 0.8rem;
+      }
+
+      .tok-item {
+        padding: 0.16rem 0.42rem;
+        border: 1px solid transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .tok-item:hover {
+        color: var(--paper);
+        border-color: var(--line-strong);
+      }
+
+      .tok-item.active {
+        background: rgba(230, 0, 0, 0.18);
+        border-color: var(--reticle);
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      /* Right Column: Multimodal Ingestion & Normalization */
+      .right-col {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+      }
+
+      .ingest-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        flex: 1;
+      }
+
+      .preset-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .preset-btn {
+        font-size: 0.68rem;
+        padding: 0.38rem 0.65rem;
+      }
+
+      .filter-toggles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
-        margin-bottom: 0.85rem;
-      }
-      .pipeline-log {
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 0.75rem;
-        background: #020617;
-        border: 1px solid var(--panel-border);
-        border-radius: 0.6rem;
         padding: 0.75rem;
-        color: #a7f3d0;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        font-size: 0.73rem;
       }
-      .pipeline-log div {
-        margin-bottom: 0.3rem;
+
+      .filter-toggles label {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--muted);
+        cursor: pointer;
       }
-      .artifact-tag {
-        display: inline-block;
-        background: rgba(245, 158, 11, 0.14);
-        color: #fcd34d;
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        font-family: ui-monospace, SFMono-Regular, monospace;
+
+      input[type="checkbox"] {
+        accent-color: var(--reticle);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 195px;
+        background: #050507;
+        border: 1px solid var(--line-strong);
+        color: var(--paper);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        padding: 0.85rem;
+        line-height: 1.55;
+        resize: vertical;
+      }
+
+      textarea:focus {
+        outline: 1px solid var(--reticle);
+      }
+
+      .pipeline-log {
+        background: #050507;
+        border: 1px solid var(--line);
+        padding: 0.85rem;
         font-size: 0.72rem;
-        padding: 0.15rem 0.45rem;
-        border-radius: 0.35rem;
-        margin: 0.15rem;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .log-entry span {
+        color: var(--amber);
+      }
+
+      @media (max-width: 960px) {
+        .instrument-grid {
+          grid-template-columns: 1fr;
+        }
+        .left-col {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+        .telemetry-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <div class="brand-group">
-          <span class="badge">MULTIMODAL OCR + ORP ENGINE</span>
-          <h1 style="margin: 0; font-size: 1.35rem">Jefferson Super Reader 3000</h1>
+    <div class="shell">
+      <div class="top-bar mono">
+        <span>INSTRUMENT // JEFFERSON SUPER READER 3000 — MULTIMODAL OCR &amp; ORP STREAMER</span>
+        <div>
+          <a href="https://michael-jefferson-portfolio.vercel.app">← PORTFOLIO</a>
+          <a href="https://github.com/jeffersonlegacy/jefferson-super-reader-3000" target="_blank" rel="noopener noreferrer">GITHUB REPO ↗</a>
         </div>
-        <div class="nav-links">
-          <a
-            href="https://github.com/jeffersonlegacy/jefferson-super-reader-3000"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-            >GitHub Repository ↗</a
-          >
-          <a
-            href="https://michael-jefferson-portfolio.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-            >← Portfolio</a
-          >
+      </div>
+
+      <header>
+        <div>
+          <p class="kicker mono">CLOUDCONVERT ASYNC PIPELINE + GEMINI VISION OCR + ORP SCHEDULER</p>
+          <h1>Jefferson Super Reader 3000</h1>
+        </div>
+        <div class="hotkeys mono" aria-label="Keyboard Shortcuts">
+          <span><kbd>Space</kbd> Play/Pause</span>
+          <span><kbd>←</kbd><kbd>→</kbd> Scrub Token</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd> ±25 WPM</span>
+          <span><kbd>R</kbd> Reset</span>
         </div>
       </header>
 
-      <div class="grid">
-        <!-- LEFT: ZERO-LAG ORP RSVP VIEWPORT -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Zero-Lag Optimal Recognition Point (ORP) Viewport</h2>
-            <span class="badge" id="status-badge">READY · SPACE TO PLAY</span>
+      <div class="instrument-grid">
+        <!-- LEFT: OPTICAL RSVP ENGINE -->
+        <section class="left-col" aria-label="Optical RSVP Viewport">
+          <div class="panel-bar mono">
+            <span>01 // OPTICAL RECOGNITION POINT (ORP) RETICLE</span>
+            <span id="status-readout">STATE: STANDBY</span>
           </div>
 
-          <div class="orp-stage" id="orp-stage">
-            <div class="orp-crosshair-line"></div>
-            <div class="orp-guide-top"></div>
-            <div class="orp-word-row">
-              <span class="orp-prefix" id="word-prefix">SU</span>
-              <span class="orp-anchor" id="word-anchor">P</span>
-              <span class="orp-suffix" id="word-suffix">ER</span>
+          <div class="optical-chamber">
+            <div class="guide-line-h"></div>
+            <div class="reticle-tick-top"></div>
+            <div class="reticle-crosshair"></div>
+            <div class="word-plane" aria-live="polite">
+              <span class="w-pre" id="w-pre">Mu</span><span class="w-orp" id="w-orp">l</span><span class="w-post" id="w-post">timodal</span>
             </div>
-            <div class="orp-guide-bottom"></div>
-            <div class="stage-hud">
-              <span id="hud-token">Token 1 / 1</span>
-              <span id="hud-orp">ORP Anchor: idx 2</span>
-              <span id="hud-cadence">Cadence: 1.00x (133ms)</span>
+            <div class="reticle-tick-bottom"></div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
             </div>
           </div>
 
-          <div class="progress-track" id="progress-track" title="Click to scrub token stream">
-            <div class="progress-fill" id="progress-fill"></div>
+          <div class="telemetry-row mono">
+            <div class="t-cell">
+              <span class="t-label">VELOCITY</span>
+              <span class="t-val" id="t-wpm">450 WPM</span>
+            </div>
+            <div class="t-cell">
+              <span class="t-label">FRAME DWELL</span>
+              <span class="t-val" id="t-dwell">133 ms</span>
+            </div>
+            <div class="t-cell">
+              <span class="t-label">ORP ANCHOR</span>
+              <span class="t-val" id="t-orp">IDX [2]</span>
+            </div>
+            <div class="t-cell">
+              <span class="t-label">CADENCE MULT</span>
+              <span class="t-val" id="t-mult">1.00×</span>
+            </div>
+            <div class="t-cell">
+              <span class="t-label">TIME REMAINING</span>
+              <span class="t-val" id="t-eta">00:12s</span>
+            </div>
           </div>
 
-          <div class="controls-row">
-            <button class="btn btn-primary" id="btn-play">▶ Play Stream</button>
-            <button class="btn" id="btn-prev">⏮ Prev</button>
-            <button class="btn" id="btn-next">⏭ Next</button>
-            <button class="btn btn-danger" id="btn-reset">↺ Reset</button>
-            <span style="margin-left: auto; font-size: 0.78rem; color: var(--muted)" id="eta-label">
-              Est. Time: 0s
-            </span>
+          <div class="controls-deck">
+            <button type="button" class="btn-primary" id="btn-play">▶ START STREAM</button>
+            <button type="button" id="btn-prev">← PREV</button>
+            <button type="button" id="btn-next">NEXT →</button>
+            <button type="button" id="btn-reset">↺ RESET</button>
+
+            <div class="wpm-control mono">
+              <label for="wpm-slider">WPM</label>
+              <input type="range" id="wpm-slider" min="150" max="1000" step="25" value="450" />
+            </div>
           </div>
 
-          <div class="slider-grid">
-            <div class="slider-box">
-              <label>
-                <span>Reading Velocity (WPM)</span>
-                <strong id="wpm-value" style="color: var(--accent)">450 WPM</strong>
+          <div class="ribbon-box">
+            <div class="panel-bar mono" style="padding: 0; background: transparent; border: none">
+              <span>02 // INTERACTIVE TOKEN STREAM (CLICK ANY TOKEN TO SEEK)</span>
+              <span id="token-counter">TOKEN 1 / 0</span>
+            </div>
+            <div class="token-ribbon mono" id="token-ribbon"></div>
+          </div>
+        </section>
+
+        <!-- RIGHT: MULTIMODAL DOCUMENT NORMALIZER -->
+        <aside class="right-col" aria-label="Document Ingestion & Layout Normalization">
+          <div class="panel-bar mono">
+            <span>03 // DOCUMENT INGESTION &amp; NOISE NORMALIZER</span>
+            <span>GEMINI VISION PRE-PROCESSOR</span>
+          </div>
+
+          <div class="ingest-body">
+            <div class="preset-row">
+              <button type="button" class="preset-btn" data-preset="ocr">LOAD SCANNED MULTI-COLUMN SAMPLE</button>
+              <button type="button" class="preset-btn" data-preset="neuro">LOAD COGNITIVE NEUROSCIENCE PAPER</button>
+              <label class="file-label preset-btn">
+                UPLOAD .TXT / .MD
+                <input type="file" id="file-input" accept=".txt,.md,.csv,.json" hidden />
               </label>
-              <input type="range" id="wpm-slider" min="200" max="900" step="25" value="450" />
             </div>
-            <div class="slider-box">
-              <label>
-                <span>Clause &amp; Punctuation Weight</span>
-                <strong id="punct-value" style="color: var(--accent)">1.00x</strong>
-              </label>
-              <input type="range" id="punct-slider" min="0.5" max="2.0" step="0.25" value="1.0" />
+
+            <div class="filter-toggles mono">
+              <label><input type="checkbox" id="flt-headers" checked /> Strip Running Headers/Page #s</label>
+              <label><input type="checkbox" id="flt-hyphens" checked /> Rejoin Line-Break Hyphens</label>
+              <label><input type="checkbox" id="flt-citations" checked /> Strip [Bracketed Citations]</label>
+              <label><input type="checkbox" id="flt-punct" checked /> Punctuation Cadence Weighting</label>
             </div>
-          </div>
 
-          <div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem">
-              <span style="font-size: 0.78rem; color: var(--muted); font-weight: 600">
-                ACTIVE NORMALIZED TOKEN STREAM (CLICK ANY WORD TO JUMP)
-              </span>
-              <span style="font-size: 0.75rem; color: var(--emerald)" id="clean-count-label"></span>
-            </div>
-            <div class="token-stream-box" id="token-stream-box"></div>
-          </div>
-        </div>
+            <textarea id="raw-input" aria-label="Source Document Text"></textarea>
 
-        <!-- RIGHT: CLOUDCONVERT + GEMINI VISION INGESTION PIPELINE -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">CloudConvert + Gemini Vision Ingestion Simulator</h2>
-            <span class="badge" style="color: var(--emerald); border-color: rgba(16,185,129,0.3)">
-              LAYOUT-AWARE OCR
-            </span>
-          </div>
-
-          <p style="font-size: 0.84rem; color: var(--muted); margin-top: 0">
-            Select a multi-column PDF/scan preset or paste raw noisy document text below. The pipeline strips running headers, page numbers, copyright footers, and inline bracket citations before computing ORP anchors.
-          </p>
-
-          <div class="preset-pills">
-            <button class="btn" data-preset="research">📄 Multi-Column AI Research PDF</button>
-            <button class="btn" data-preset="legal">⚖️ Scanned FinTech Compliance Brief</button>
-            <button class="btn" data-preset="neuro">🧠 Cognitive Neuroscience Paper</button>
-          </div>
-
-          <textarea id="raw-input" aria-label="Raw Document Input"></textarea>
-
-          <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem">
-            <button class="btn btn-primary" id="btn-ingest" style="width: 100%; justify-content: center">
-              ⚡ Run CloudConvert Frame Normalization + Gemini Vision OCR Filter
+            <button type="button" class="btn-primary" id="btn-normalize" style="justify-content: center">
+              NORMALIZE &amp; LOAD INTO ORP STREAM
             </button>
-          </div>
 
-          <div class="pipeline-log" id="pipeline-log"></div>
-
-          <div style="margin-top: 0.9rem">
-            <div style="font-size: 0.76rem; color: var(--muted); font-weight: 600; margin-bottom: 0.35rem">
-              STRIPPED HEADER / FOOTER / CITATION NOISE ARTIFACTS:
+            <div class="pipeline-log mono" id="pipeline-log">
+              <div class="log-entry"><span>[STAGE 1]</span> CloudConvert PDF/DOCX → 300 DPI PNG page frames</div>
+              <div class="log-entry"><span>[STAGE 2]</span> Gemini Vision layout extraction: 0 artifacts</div>
+              <div class="log-entry" id="log-summary"><span>[STAGE 3]</span> Ready.</div>
             </div>
-            <div id="stripped-artifacts"></div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
 
     <script>
       const PRESETS = {
-        research: `Page 1 of 14
-2026 | JOURNAL OF APPLIED MULTIMODAL SYSTEMS
-Standard PDF parsers strip semantic layout context or fail on complex multi-column tables and scanned page images [1, 3]. When garbled tokens or running headers enter a Rapid Serial Visual Presentation (RSVP) stream, foveal fixation collapses and cognitive load spikes [4, 7].
-Page 2 of 14
-© 2026 Jefferson Legacy Systems - All Rights Reserved
-Jefferson Super Reader 3000 replaces brittle regex scraping with an asynchronous CloudConvert normalization pipeline paired with Gemini Vision OCR [8]. Every word is aligned at its deterministic Optimal Recognition Point (ORP), while clause boundaries dynamically modulate frame duration for effortless high-velocity comprehension.`,
-        legal: `CONFIDENTIAL - INTERNAL AUDIT MEMORANDUM
-Page 4 of 9
-In multi-jurisdictional B2B tax and compliance workflows, scanned W-2, 1099-NEC, and Schedule C attachments frequently arrive skewed or embedded inside multi-page PDF packets [12]. Asynchronous frame conversion standardizes every page to 300 DPI before vision extraction [15, 19], guaranteeing zero token drift during rapid executive review.`,
-        neuro: `Page 7 of 22
-14 | COGNITIVE ARCHITECTURE & HUMAN-IN-THE-LOOP SYSTEMS
-Human reading relies on parvocellular foveal fixation slightly left of a word's geometric center—the Optimal Recognition Point (ORP) [2, 5]. By locking the ORP character to a fixed red reticle and extending dwell time by 1.35x on sentence-terminal punctuation, readers sustain 500 to 800 words per minute without vocalization fatigue [9, 11].`
+        ocr: `PAGE 14 — JOURNAL OF APPLIED AI SYSTEMS — RUNNING HEADER
+Standard PDF parsers strip semantic layout and choke on multi-
+column text, tables, and scanned documents [12, 14]. When raw scraped strings feed into a Rapid Serial Visual Presentation (RSVP) reader, broken hyphen-
+ations and header artifacts destroy human reading comprehension [19].
+PAGE 15 — JOURNAL OF APPLIED AI SYSTEMS
+Jefferson Super Reader 3000 resolves this bottleneck by pairing CloudConvert asynchronous page rendering with Gemini Vision multimodal extraction. Every word is aligned at its Optimal Recognition Point (ORP), eliminating saccadic eye movement while dynamically pausing on clause and sentence boundaries.`,
+        neuro: `RUNNING HEADER: SACCADIC SUPPRESSION & ORP FIXATION — P. 42
+During natural reading, human eyes make three to four saccadic jumps per second, spending nearly 85% of total cognitive latency re-acquiring fixation targets [1, 4]. By anchoring the Optimal Recognition Point—located slightly left of a word's geometric center—directly onto the foveal axis, serial visual presentation bypasses oculomotor travel entirely. Punctuation-weighted cadence modulation prevents working-memory saturation across dense technical clauses.`,
       };
 
-      function calculateOrpIndex(word) {
-        const cleanLength = word.replace(/[^a-zA-Z0-9]/g, '').length || word.length;
-        if (cleanLength <= 1) return 0;
-        if (cleanLength <= 5) return 1;
-        if (cleanLength <= 9) return 2;
-        if (cleanLength <= 13) return 3;
+      const rawInput = document.getElementById("raw-input");
+      const fltHeaders = document.getElementById("flt-headers");
+      const fltHyphens = document.getElementById("flt-hyphens");
+      const fltCitations = document.getElementById("flt-citations");
+      const fltPunct = document.getElementById("flt-punct");
+      const logSummary = document.getElementById("log-summary");
+
+      const wPre = document.getElementById("w-pre");
+      const wOrp = document.getElementById("w-orp");
+      const wPost = document.getElementById("w-post");
+      const progressFill = document.getElementById("progress-fill");
+      const statusReadout = document.getElementById("status-readout");
+      const tokenCounter = document.getElementById("token-counter");
+      const tokenRibbon = document.getElementById("token-ribbon");
+
+      const tWpm = document.getElementById("t-wpm");
+      const tDwell = document.getElementById("t-dwell");
+      const tOrp = document.getElementById("t-orp");
+      const tMult = document.getElementById("t-mult");
+      const tEta = document.getElementById("t-eta");
+
+      const btnPlay = document.getElementById("btn-play");
+      const btnPrev = document.getElementById("btn-prev");
+      const btnNext = document.getElementById("btn-next");
+      const btnReset = document.getElementById("btn-reset");
+      const wpmSlider = document.getElementById("wpm-slider");
+
+      let tokens = [];
+      let currentIdx = 0;
+      let timer = null;
+
+      function computeOrp(word) {
+        const cleanLen = word.replace(/[^a-zA-Z0-9]/g, "").length;
+        if (cleanLen <= 1) return 0;
+        if (cleanLen <= 5) return 1;
+        if (cleanLen <= 9) return 2;
+        if (cleanLen <= 13) return 3;
         return 4;
       }
 
-      function calculateCadenceMultiplier(word, scale) {
-        let mult = 1.0;
-        if (/[.!?]["')\]]?$/.test(word)) {
-          mult += 1.35 * scale;
-        } else if (/[,;:—–]["')\]]?$/.test(word)) {
-          mult += 0.75 * scale;
+      function normalizeDocument(raw) {
+        let text = raw;
+        let removedArtifacts = 0;
+
+        if (fltHeaders.checked) {
+          const before = text.length;
+          text = text.replace(/^(PAGE\s+\d+.*|.*RUNNING HEADER.*)$/gim, "");
+          if (text.length !== before) removedArtifacts += 2;
         }
-        if (word.length >= 11) mult += 0.25;
-        else if (word.length <= 3) mult = Math.max(0.85, mult - 0.1);
-        return Number(mult.toFixed(2));
+        if (fltHyphens.checked) {
+          const matches = text.match(/-\s*\n\s*/g);
+          if (matches) removedArtifacts += matches.length;
+          text = text.replace(/-\s*\n\s*/g, "");
+        }
+        if (fltCitations.checked) {
+          const matches = text.match(/\[\d+(?:,\s*\d+)*\]/g);
+          if (matches) removedArtifacts += matches.length;
+          text = text.replace(/\[\d+(?:,\s*\d+)*\]/g, "");
+        }
+
+        const out = text
+          .replace(/\s+/g, " ")
+          .trim()
+          .split(" ")
+          .filter(Boolean);
+
+        logSummary.innerHTML = `<span>[STAGE 3]</span> Normalized ${out.length} clean tokens (${removedArtifacts} layout artifacts stripped)`;
+        return out;
       }
 
-      function filterNoise(rawText) {
-        const removed = [];
-        const kept = [];
-        for (const line of rawText.split('\n')) {
-          const t = line.trim();
-          if (!t) continue;
-          if (/^(Page\s+\d+(\s+of\s+\d+)?|\d+\s*\|\s*[A-Z].*|©\s*\d{4}.*|CONFIDENTIAL.*)$/i.test(t)) {
-            removed.push(t);
-            continue;
-          }
-          const cleaned = t.replace(/\s*\[\d+(?:,\s*\d+)*\]/g, (m) => {
-            removed.push(m.trim());
-            return '';
+      function buildRibbon() {
+        tokenRibbon.innerHTML = "";
+        tokens.forEach((tok, i) => {
+          const span = document.createElement("span");
+          span.className = "tok-item" + (i === currentIdx ? " active" : "");
+          span.textContent = tok;
+          span.addEventListener("click", () => {
+            pauseStream();
+            currentIdx = i;
+            renderFrame();
           });
-          kept.push(cleaned);
-        }
-        return {
-          cleanText: kept.join(' ').replace(/\s+/g, ' ').trim(),
-          removed
-        };
-      }
-
-      let tokens = [];
-      let currentIndex = 0;
-      let isPlaying = false;
-      let timerId = null;
-      let wpm = 450;
-      let punctScale = 1.0;
-
-      const rawInputEl = document.getElementById('raw-input');
-      const prefixEl = document.getElementById('word-prefix');
-      const anchorEl = document.getElementById('word-anchor');
-      const suffixEl = document.getElementById('word-suffix');
-      const hudTokenEl = document.getElementById('hud-token');
-      const hudOrpEl = document.getElementById('hud-orp');
-      const hudCadenceEl = document.getElementById('hud-cadence');
-      const progressFillEl = document.getElementById('progress-fill');
-      const tokenBoxEl = document.getElementById('token-stream-box');
-      const statusBadgeEl = document.getElementById('status-badge');
-      const btnPlayEl = document.getElementById('btn-play');
-      const pipelineLogEl = document.getElementById('pipeline-log');
-      const strippedEl = document.getElementById('stripped-artifacts');
-      const cleanCountEl = document.getElementById('clean-count-label');
-      const etaLabelEl = document.getElementById('eta-label');
-
-      function buildStream() {
-        const { cleanText, removed } = filterNoise(rawInputEl.value);
-        const words = cleanText.split(' ').filter(Boolean);
-        tokens = words.map((raw, index) => {
-          const orpIndex = Math.min(calculateOrpIndex(raw), Math.max(0, raw.length - 1));
-          return {
-            index,
-            raw,
-            prefix: raw.slice(0, orpIndex),
-            anchor: raw.charAt(orpIndex) || '',
-            suffix: raw.slice(orpIndex + 1),
-            orpIndex,
-            mult: calculateCadenceMultiplier(raw, punctScale)
-          };
+          tokenRibbon.appendChild(span);
         });
-
-        cleanCountEl.textContent = `${tokens.length} clean tokens`;
-        const totalSeconds = Math.round(
-          tokens.reduce((acc, tk) => acc + (60 / wpm) * tk.mult, 0)
-        );
-        etaLabelEl.textContent = `Est. Read Time: ${totalSeconds}s @ ${wpm} WPM`;
-
-        pipelineLogEl.innerHTML = `
-          <div>[CloudConvert] Job cc-${Math.random().toString(36).slice(2, 7)} → Normalized 300 DPI page frames (142ms)</div>
-          <div>[Gemini Vision OCR] Layout reconstructed · ${removed.length} noise artifacts stripped</div>
-          <div>[ORP Scheduler] Indexed ${tokens.length} tokens with punctuation cadence weights</div>
-        `;
-
-        strippedEl.innerHTML = removed.length
-          ? removed.map((r) => `<span class="artifact-tag">✂ ${r}</span>`).join('')
-          : '<span style="font-size:0.75rem;color:var(--muted)">No noise artifacts detected</span>';
-
-        renderTokenChips();
-        if (currentIndex >= tokens.length) currentIndex = 0;
-        renderFrame();
-      }
-
-      function renderTokenChips() {
-        tokenBoxEl.innerHTML = tokens
-          .map(
-            (t, idx) =>
-              `<span class="token-chip ${idx === currentIndex ? 'active' : ''}" data-idx="${idx}">${t.raw}</span>`
-          )
-          .join(' ');
       }
 
       function renderFrame() {
         if (!tokens.length) return;
-        const tk = tokens[currentIndex] || tokens[0];
-        prefixEl.textContent = tk.prefix;
-        anchorEl.textContent = tk.anchor;
-        suffixEl.textContent = tk.suffix;
+        const word = tokens[currentIdx] || "";
+        const orp = Math.min(computeOrp(word), Math.max(0, word.length - 1));
 
-        const baseMs = Math.round((60000 / wpm) * tk.mult);
-        hudTokenEl.textContent = `Token ${currentIndex + 1} / ${tokens.length}`;
-        hudOrpEl.textContent = `ORP Anchor: "${tk.anchor}" (idx ${tk.orpIndex})`;
-        hudCadenceEl.textContent = `Cadence: ${tk.mult}x (${baseMs}ms)`;
+        wPre.textContent = word.slice(0, orp);
+        wOrp.textContent = word[orp] || "";
+        wPost.textContent = word.slice(orp + 1);
 
-        const pct = ((currentIndex + 1) / tokens.length) * 100;
-        progressFillEl.style.width = `${pct}%`;
-
-        const prevActive = tokenBoxEl.querySelector('.token-chip.active');
-        if (prevActive) prevActive.classList.remove('active');
-        const nextActive = tokenBoxEl.querySelector(`.token-chip[data-idx="${currentIndex}"]`);
-        if (nextActive) {
-          nextActive.classList.add('active');
-          nextActive.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        const wpm = Number(wpmSlider.value);
+        const baseMs = 60000 / wpm;
+        let mult = 1.0;
+        if (fltPunct.checked) {
+          if (/[.!?]["')]*$/.test(word)) mult = 2.05;
+          else if (/[,;:—]["')]*$/.test(word)) mult = 1.45;
+          else if (word.length >= 11) mult = 1.2;
         }
+        const dwellMs = Math.round(baseMs * mult);
+        const pct = tokens.length > 1 ? (currentIdx / (tokens.length - 1)) * 100 : 100;
+        progressFill.style.width = `${pct}%`;
+
+        const remTokens = Math.max(0, tokens.length - currentIdx);
+        const remSec = Math.ceil((remTokens * baseMs) / 1000);
+
+        tWpm.textContent = `${wpm} WPM`;
+        tDwell.textContent = `${dwellMs} ms`;
+        tOrp.textContent = `IDX [${orp}]`;
+        tMult.textContent = `${mult.toFixed(2)}×`;
+        tEta.textContent = `00:${String(remSec).padStart(2, "0")}s`;
+        tokenCounter.textContent = `TOKEN ${currentIdx + 1} / ${tokens.length}`;
+
+        const items = tokenRibbon.children;
+        for (let i = 0; i < items.length; i++) {
+          items[i].classList.toggle("active", i === currentIdx);
+        }
+        if (items[currentIdx]) {
+          items[currentIdx].scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
+
+        return dwellMs;
       }
 
-      function stepForward() {
-        if (!isPlaying) return;
-        if (currentIndex < tokens.length - 1) {
-          currentIndex++;
-          renderFrame();
-          const delay = Math.round((60000 / wpm) * tokens[currentIndex].mult);
-          timerId = setTimeout(stepForward, delay);
+      function stepStream() {
+        const dwell = renderFrame();
+        if (currentIdx < tokens.length - 1) {
+          currentIdx++;
+          timer = setTimeout(stepStream, dwell);
         } else {
           pauseStream();
-          statusBadgeEl.textContent = 'STREAM COMPLETE';
+          statusReadout.textContent = "STATE: COMPLETE";
         }
       }
 
-      function playStream() {
-        if (!tokens.length) return;
-        if (currentIndex >= tokens.length - 1) currentIndex = 0;
-        isPlaying = true;
-        btnPlayEl.textContent = '⏸ Pause Stream';
-        statusBadgeEl.textContent = `STREAMING @ ${wpm} WPM`;
-        renderFrame();
-        const delay = Math.round((60000 / wpm) * tokens[currentIndex].mult);
-        timerId = setTimeout(stepForward, delay);
+      function startStream() {
+        if (currentIdx >= tokens.length - 1) currentIdx = 0;
+        statusReadout.textContent = "STATE: STREAMING";
+        btnPlay.textContent = "⏸ PAUSE STREAM";
+        stepStream();
       }
 
       function pauseStream() {
-        isPlaying = false;
-        clearTimeout(timerId);
-        btnPlayEl.textContent = '▶ Play Stream';
-        statusBadgeEl.textContent = 'PAUSED';
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        statusReadout.textContent = "STATE: PAUSED";
+        btnPlay.textContent = "▶ START STREAM";
       }
 
-      btnPlayEl.addEventListener('click', () => {
-        if (isPlaying) pauseStream();
-        else playStream();
+      function loadAndNormalize() {
+        pauseStream();
+        tokens = normalizeDocument(rawInput.value);
+        currentIdx = 0;
+        buildRibbon();
+        renderFrame();
+      }
+
+      btnPlay.addEventListener("click", () => {
+        if (timer) pauseStream();
+        else startStream();
       });
 
-      document.getElementById('btn-prev').addEventListener('click', () => {
+      btnPrev.addEventListener("click", () => {
         pauseStream();
-        currentIndex = Math.max(0, currentIndex - 1);
+        currentIdx = Math.max(0, currentIdx - 1);
         renderFrame();
       });
 
-      document.getElementById('btn-next').addEventListener('click', () => {
+      btnNext.addEventListener("click", () => {
         pauseStream();
-        currentIndex = Math.min(tokens.length - 1, currentIndex + 1);
+        currentIdx = Math.min(tokens.length - 1, currentIdx + 1);
         renderFrame();
       });
 
-      document.getElementById('btn-reset').addEventListener('click', () => {
+      btnReset.addEventListener("click", () => {
         pauseStream();
-        currentIndex = 0;
-        renderFrame();
-        statusBadgeEl.textContent = 'RESET · READY';
-      });
-
-      document.getElementById('wpm-slider').addEventListener('input', (e) => {
-        wpm = Number(e.target.value);
-        document.getElementById('wpm-value').textContent = `${wpm} WPM`;
-        buildStream();
-      });
-
-      document.getElementById('punct-slider').addEventListener('input', (e) => {
-        punctScale = Number(e.target.value);
-        document.getElementById('punct-value').textContent = `${punctScale.toFixed(2)}x`;
-        buildStream();
-      });
-
-      document.getElementById('btn-ingest').addEventListener('click', () => {
-        pauseStream();
-        currentIndex = 0;
-        buildStream();
-      });
-
-      tokenBoxEl.addEventListener('click', (e) => {
-        const chip = e.target.closest('.token-chip');
-        if (!chip) return;
-        pauseStream();
-        currentIndex = Number(chip.dataset.idx);
+        currentIdx = 0;
         renderFrame();
       });
 
-      document.getElementById('progress-track').addEventListener('click', (e) => {
-        if (!tokens.length) return;
-        pauseStream();
-        const rect = e.currentTarget.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        currentIndex = Math.floor(ratio * (tokens.length - 1));
-        renderFrame();
-      });
+      wpmSlider.addEventListener("input", () => renderFrame());
+      document.getElementById("btn-normalize").addEventListener("click", loadAndNormalize);
 
-      document.querySelectorAll('[data-preset]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          pauseStream();
-          rawInputEl.value = PRESETS[btn.dataset.preset];
-          currentIndex = 0;
-          buildStream();
+      document.querySelectorAll("[data-preset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          rawInput.value = PRESETS[btn.dataset.preset];
+          loadAndNormalize();
         });
       });
 
-      window.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-        if (e.code === 'Space') {
+      document.getElementById("file-input").addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        rawInput.value = await file.text();
+        loadAndNormalize();
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+        if (e.code === "Space") {
           e.preventDefault();
-          if (isPlaying) pauseStream();
-          else playStream();
+          if (timer) pauseStream();
+          else startStream();
+        } else if (e.code === "ArrowRight") {
+          pauseStream();
+          currentIdx = Math.min(tokens.length - 1, currentIdx + 1);
+          renderFrame();
+        } else if (e.code === "ArrowLeft") {
+          pauseStream();
+          currentIdx = Math.max(0, currentIdx - 1);
+          renderFrame();
+        } else if (e.code === "ArrowUp") {
+          e.preventDefault();
+          wpmSlider.value = Math.min(1000, Number(wpmSlider.value) + 25);
+          renderFrame();
+        } else if (e.code === "ArrowDown") {
+          e.preventDefault();
+          wpmSlider.value = Math.max(150, Number(wpmSlider.value) - 25);
+          renderFrame();
+        } else if (e.key === "r" || e.key === "R") {
+          pauseStream();
+          currentIdx = 0;
+          renderFrame();
         }
       });
 
-      rawInputEl.value = PRESETS.research;
-      buildStream();
+      rawInput.value = PRESETS.ocr;
+      loadAndNormalize();
     </script>
   </body>
 </html>
