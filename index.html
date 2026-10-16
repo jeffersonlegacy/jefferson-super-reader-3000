@@ -542,6 +542,12 @@
             <button type="button" id="btn-reset">↺ RESET</button>
 
             <div class="wpm-control mono">
+              <label for="chunk-select">CHUNK</label>
+              <select id="chunk-select" style="background: var(--surface); color: var(--paper); border: 1px solid var(--line-strong); padding: 0.42rem 0.55rem; font-family: var(--mono); font-size: 0.72rem;">
+                <option value="1">1-WORD (ORP)</option>
+                <option value="2">2-WORD PHRASE</option>
+                <option value="3">3-WORD SACCADE</option>
+              </select>
               <label for="wpm-slider">WPM</label>
               <input type="range" id="wpm-slider" min="150" max="1000" step="25" value="450" />
             </div>
@@ -565,8 +571,9 @@
 
           <div class="ingest-body">
             <div class="preset-row">
-              <button type="button" class="preset-btn" data-preset="ocr">LOAD SCANNED MULTI-COLUMN SAMPLE</button>
-              <button type="button" class="preset-btn" data-preset="neuro">LOAD COGNITIVE NEUROSCIENCE PAPER</button>
+              <button type="button" class="preset-btn" data-preset="ocr">SCANNED MULTI-COLUMN</button>
+              <button type="button" class="preset-btn" data-preset="neuro">NEUROSCIENCE PAPER</button>
+              <button type="button" class="preset-btn" data-preset="legal">SEC 10-K FILING</button>
               <label class="file-label preset-btn">
                 UPLOAD .TXT / .MD
                 <input type="file" id="file-input" accept=".txt,.md,.csv,.json" hidden />
@@ -578,17 +585,24 @@
               <label><input type="checkbox" id="flt-hyphens" checked /> Rejoin Line-Break Hyphens</label>
               <label><input type="checkbox" id="flt-citations" checked /> Strip [Bracketed Citations]</label>
               <label><input type="checkbox" id="flt-punct" checked /> Punctuation Cadence Weighting</label>
+              <label><input type="checkbox" id="flt-ramp" /> Progressive WPM Ramp (+10%)</label>
+              <label><input type="checkbox" id="flt-numbers" checked /> Numeric Clause Hold (1.35×)</label>
             </div>
 
             <textarea id="raw-input" aria-label="Source Document Text"></textarea>
 
-            <button type="button" class="btn-primary" id="btn-normalize" style="justify-content: center">
-              NORMALIZE &amp; LOAD INTO ORP STREAM
-            </button>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn-primary" id="btn-normalize" style="flex: 1; justify-content: center">
+                NORMALIZE &amp; LOAD INTO ORP STREAM
+              </button>
+              <button type="button" id="btn-export-json" title="Export normalized ORP token packet as JSON">
+                EXPORT JSON ↘
+              </button>
+            </div>
 
             <div class="pipeline-log mono" id="pipeline-log">
               <div class="log-entry"><span>[STAGE 1]</span> CloudConvert PDF/DOCX → 300 DPI PNG page frames</div>
-              <div class="log-entry"><span>[STAGE 2]</span> Gemini Vision layout extraction: 0 artifacts</div>
+              <div class="log-entry" id="log-lexical"><span>[STAGE 2]</span> Lexical profile: computing...</div>
               <div class="log-entry" id="log-summary"><span>[STAGE 3]</span> Ready.</div>
             </div>
           </div>
@@ -606,6 +620,8 @@ PAGE 15 — JOURNAL OF APPLIED AI SYSTEMS
 Jefferson Super Reader 3000 resolves this bottleneck by pairing CloudConvert asynchronous page rendering with Gemini Vision multimodal extraction. Every word is aligned at its Optimal Recognition Point (ORP), eliminating saccadic eye movement while dynamically pausing on clause and sentence boundaries.`,
         neuro: `RUNNING HEADER: SACCADIC SUPPRESSION & ORP FIXATION — P. 42
 During natural reading, human eyes make three to four saccadic jumps per second, spending nearly 85% of total cognitive latency re-acquiring fixation targets [1, 4]. By anchoring the Optimal Recognition Point—located slightly left of a word's geometric center—directly onto the foveal axis, serial visual presentation bypasses oculomotor travel entirely. Punctuation-weighted cadence modulation prevents working-memory saturation across dense technical clauses.`,
+        legal: `PAGE 88 — FORM 10-K ANNUAL REPORT — UNAUDITED FOOTNOTE
+Total recurring enterprise platform revenue reached $142.8 million in FY2025, representing a 38.4% year-over-year expansion [7, 9]. Deferred contract liabilities decreased by $11.2 million following deterministic automated onboarding across 410 forward-deployed enterprise accounts.`,
       };
 
       const rawInput = document.getElementById("raw-input");
@@ -613,7 +629,11 @@ During natural reading, human eyes make three to four saccadic jumps per second,
       const fltHyphens = document.getElementById("flt-hyphens");
       const fltCitations = document.getElementById("flt-citations");
       const fltPunct = document.getElementById("flt-punct");
+      const fltRamp = document.getElementById("flt-ramp");
+      const fltNumbers = document.getElementById("flt-numbers");
+      const chunkSelect = document.getElementById("chunk-select");
       const logSummary = document.getElementById("log-summary");
+      const logLexical = document.getElementById("log-lexical");
 
       const wPre = document.getElementById("w-pre");
       const wOrp = document.getElementById("w-orp");
@@ -674,6 +694,11 @@ During natural reading, human eyes make three to four saccadic jumps per second,
           .split(" ")
           .filter(Boolean);
 
+        const avgChars = out.length
+          ? (out.reduce((acc, w) => acc + w.replace(/[^a-zA-Z0-9]/g, "").length, 0) / out.length).toFixed(1)
+          : "0.0";
+        const longWords = out.filter((w) => w.replace(/[^a-zA-Z]/g, "").length >= 9).length;
+        logLexical.innerHTML = `<span>[STAGE 2]</span> Lexical density: avg ${avgChars} chars/tok · ${longWords} high-complexity terms`;
         logSummary.innerHTML = `<span>[STAGE 3]</span> Normalized ${out.length} clean tokens (${removedArtifacts} layout artifacts stripped)`;
         return out;
       }
@@ -695,29 +720,36 @@ During natural reading, human eyes make three to four saccadic jumps per second,
 
       function renderFrame() {
         if (!tokens.length) return;
-        const word = tokens[currentIdx] || "";
-        const orp = Math.min(computeOrp(word), Math.max(0, word.length - 1));
+        const chunkSize = Number(chunkSelect.value) || 1;
+        const chunkWords = tokens.slice(currentIdx, currentIdx + chunkSize);
+        const word = chunkWords.join(" ");
+        const orp = Math.min(computeOrp(chunkWords[0] || ""), Math.max(0, word.length - 1));
 
         wPre.textContent = word.slice(0, orp);
         wOrp.textContent = word[orp] || "";
         wPost.textContent = word.slice(orp + 1);
 
-        const wpm = Number(wpmSlider.value);
-        const baseMs = 60000 / wpm;
+        const baseWpm = Number(wpmSlider.value);
+        const progressRatio = tokens.length > 1 ? currentIdx / (tokens.length - 1) : 0;
+        const effectiveWpm = fltRamp.checked ? Math.round(baseWpm * (1 + progressRatio * 0.15)) : baseWpm;
+        const baseMs = (60000 / effectiveWpm) * chunkSize;
         let mult = 1.0;
         if (fltPunct.checked) {
           if (/[.!?]["')]*$/.test(word)) mult = 2.05;
           else if (/[,;:—]["')]*$/.test(word)) mult = 1.45;
           else if (word.length >= 11) mult = 1.2;
         }
+        if (fltNumbers.checked && /\d/.test(word)) {
+          mult = Math.max(mult, 1.35);
+        }
         const dwellMs = Math.round(baseMs * mult);
         const pct = tokens.length > 1 ? (currentIdx / (tokens.length - 1)) * 100 : 100;
         progressFill.style.width = `${pct}%`;
 
         const remTokens = Math.max(0, tokens.length - currentIdx);
-        const remSec = Math.ceil((remTokens * baseMs) / 1000);
+        const remSec = Math.ceil((remTokens * (60000 / effectiveWpm)) / 1000);
 
-        tWpm.textContent = `${wpm} WPM`;
+        tWpm.textContent = `${effectiveWpm} WPM`;
         tDwell.textContent = `${dwellMs} ms`;
         tOrp.textContent = `IDX [${orp}]`;
         tMult.textContent = `${mult.toFixed(2)}×`;
@@ -726,7 +758,7 @@ During natural reading, human eyes make three to four saccadic jumps per second,
 
         const items = tokenRibbon.children;
         for (let i = 0; i < items.length; i++) {
-          items[i].classList.toggle("active", i === currentIdx);
+          items[i].classList.toggle("active", i >= currentIdx && i < currentIdx + chunkSize);
         }
         if (items[currentIdx]) {
           items[currentIdx].scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -737,8 +769,9 @@ During natural reading, human eyes make three to four saccadic jumps per second,
 
       function stepStream() {
         const dwell = renderFrame();
-        if (currentIdx < tokens.length - 1) {
-          currentIdx++;
+        const chunkSize = Number(chunkSelect.value) || 1;
+        if (currentIdx + chunkSize < tokens.length) {
+          currentIdx += chunkSize;
           timer = setTimeout(stepStream, dwell);
         } else {
           pauseStream();
@@ -777,13 +810,15 @@ During natural reading, human eyes make three to four saccadic jumps per second,
 
       btnPrev.addEventListener("click", () => {
         pauseStream();
-        currentIdx = Math.max(0, currentIdx - 1);
+        const chunkSize = Number(chunkSelect.value) || 1;
+        currentIdx = Math.max(0, currentIdx - chunkSize);
         renderFrame();
       });
 
       btnNext.addEventListener("click", () => {
         pauseStream();
-        currentIdx = Math.min(tokens.length - 1, currentIdx + 1);
+        const chunkSize = Number(chunkSelect.value) || 1;
+        currentIdx = Math.min(tokens.length - 1, currentIdx + chunkSize);
         renderFrame();
       });
 
@@ -794,7 +829,32 @@ During natural reading, human eyes make three to four saccadic jumps per second,
       });
 
       wpmSlider.addEventListener("input", () => renderFrame());
+      chunkSelect.addEventListener("change", () => renderFrame());
+      fltRamp.addEventListener("change", () => renderFrame());
+      fltNumbers.addEventListener("change", () => renderFrame());
       document.getElementById("btn-normalize").addEventListener("click", loadAndNormalize);
+
+      document.getElementById("btn-export-json").addEventListener("click", () => {
+        const packet = {
+          engine: "Jefferson Super Reader 3000",
+          pipeline: "CloudConvert + Gemini Vision OCR + ORP Scheduler",
+          wpm: Number(wpmSlider.value),
+          chunkSize: Number(chunkSelect.value) || 1,
+          tokenCount: tokens.length,
+          tokens: tokens.map((word, index) => ({
+            index,
+            word,
+            orpIndex: computeOrp(word),
+          })),
+        };
+        const blob = new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "super-reader-3000-orp-packet.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
 
       document.querySelectorAll("[data-preset]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -811,7 +871,7 @@ During natural reading, human eyes make three to four saccadic jumps per second,
       });
 
       window.addEventListener("keydown", (e) => {
-        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
         if (e.code === "Space") {
           e.preventDefault();
           if (timer) pauseStream();
